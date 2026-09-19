@@ -70,6 +70,8 @@ bool openPhoto(const std::string& path) {
         execlp(
             "fbi",
             "fbi",
+            "-T",
+            "1",
             fullPath.c_str(),
             static_cast<char*>(nullptr)
         );
