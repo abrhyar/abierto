@@ -171,8 +171,8 @@ int main() {
 
                 if (!inGames) {
 
-                    if (mainMenu[selected].name == "Salir") {
-                        running = false;
+                    if (mainMenu[selected].name == "Apagar") {
+                        system("sudo poweroff");
                     }
 
                     else if (mainMenu[selected].name == "Juegos") {

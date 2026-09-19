@@ -10,7 +10,7 @@ std::vector<MenuItem> getMainMenu() {
         {"Bluetooth"},
         {"Wi-Fi"},
         {"Configuración"},
-        {"Salir"}
+        {"Apagar"}
     };
 }
 
