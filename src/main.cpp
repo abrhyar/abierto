@@ -1,5 +1,6 @@
 #include "menu.h"
 #include "ui.h"
+#include "photos.h"
 
 #include <ncurses.h>
 #include <vector>
@@ -13,15 +14,124 @@ int main() {
 
     bool running = true;
     bool inGames = false;
+    bool inPhotos = false;
 
     int selected = 0;
 
     while (running) {
 
+        // =========================
+        // MENU DE FOTOS
+        // =========================
+
+        if (inPhotos) {
+
+            std::vector<MenuItem> photosMenu = getPhotos();
+
+            if (photosMenu.empty()) {
+
+                clear();
+
+                int height, width;
+                getmaxyx(stdscr, height, width);
+
+                attron(A_BOLD);
+                mvprintw(1, 2, "FOTOS");
+                attroff(A_BOLD);
+
+                mvprintw(
+                    height / 2,
+                    (width - 22) / 2,
+                    "No hay imagenes."
+                );
+
+                mvprintw(
+                    height - 2,
+                    2,
+                    "ESC  Volver"
+                );
+
+                refresh();
+
+                int key = getch();
+
+                if (key == 27) {
+                    inPhotos = false;
+                    selected = 0;
+                }
+
+                continue;
+            }
+
+            if (selected >= static_cast<int>(photosMenu.size())) {
+                selected = photosMenu.size() - 1;
+            }
+
+            drawMenu(
+                photosMenu,
+                selected,
+                "Fotos"
+            );
+
+            int key = getch();
+
+            switch (key) {
+
+                case KEY_UP:
+                    selected--;
+
+                    if (selected < 0) {
+                        selected = photosMenu.size() - 1;
+                    }
+
+                    break;
+
+                case KEY_DOWN:
+                    selected++;
+
+                    if (selected >= static_cast<int>(photosMenu.size())) {
+                        selected = 0;
+                    }
+
+                    break;
+
+                case '\n':
+                case KEY_ENTER:
+                    openPhoto(photosMenu[selected].name);
+                    break;
+
+                case 27:
+                    inPhotos = false;
+                    selected = 0;
+                    break;
+            }
+
+            continue;
+        }
+
+        // =========================
+        // MENU DE JUEGOS
+        // =========================
+
         if (inGames) {
-            drawMenu(gamesMenu, selected, "Juegos");
+
+            drawMenu(
+                gamesMenu,
+                selected,
+                "Juegos"
+            );
+
         } else {
-            drawMenu(mainMenu, selected, "Launcher principal");
+
+            // =========================
+            // MENU PRINCIPAL
+            // =========================
+
+            drawMenu(
+                mainMenu,
+                selected,
+                "Launcher principal"
+            );
         }
 
         int key = getch();
@@ -29,6 +139,7 @@ int main() {
         switch (key) {
 
             case KEY_UP:
+
                 selected--;
 
                 if (selected < 0) {
@@ -40,6 +151,7 @@ int main() {
                 break;
 
             case KEY_DOWN:
+
                 selected++;
 
                 if (inGames &&
@@ -68,6 +180,11 @@ int main() {
                         selected = 0;
                     }
 
+                    else if (mainMenu[selected].name == "Fotos") {
+                        inPhotos = true;
+                        selected = 0;
+                    }
+
                     else {
                         clear();
 
@@ -75,7 +192,8 @@ int main() {
                         getmaxyx(stdscr, height, width);
 
                         std::string message =
-                            mainMenu[selected].name + " seleccionado";
+                            mainMenu[selected].name +
+                            " seleccionado";
 
                         mvprintw(
                             height / 2,
@@ -97,18 +215,20 @@ int main() {
                 } else {
 
                     if (gamesMenu[selected].name == "Volver") {
+
                         inGames = false;
                         selected = 0;
-                    }
 
-                    else {
+                    } else {
+
                         clear();
 
                         int height, width;
                         getmaxyx(stdscr, height, width);
 
                         std::string message =
-                            gamesMenu[selected].name + " seleccionado";
+                            gamesMenu[selected].name +
+                            " seleccionado";
 
                         mvprintw(
                             height / 2,
@@ -130,7 +250,7 @@ int main() {
 
                 break;
 
-            case 27: // ESC
+            case 27:
 
                 if (inGames) {
                     inGames = false;

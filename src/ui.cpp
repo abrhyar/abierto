@@ -15,9 +15,11 @@ void initUI() {
     start_color();
     use_default_colors();
 
-    init_pair(1, COLOR_CYAN, -1);
-    init_pair(2, COLOR_WHITE, -1);
-    init_pair(3, COLOR_BLACK, COLOR_CYAN);
+    // Negro de la terminal como fondo
+    init_pair(1, COLOR_WHITE, -1);  // Texto normal
+    init_pair(2, COLOR_CYAN, -1);   // Indicador >
+    init_pair(3, COLOR_WHITE, -1);  // Titulo
+    init_pair(4, COLOR_WHITE, -1);  // MX
 }
 
 void shutdownUI() {
@@ -27,45 +29,72 @@ void shutdownUI() {
 void drawMenu(
     const std::vector<MenuItem>& menu,
     int selected,
-    const std::string& title)   {
+    const std::string& title
+) {
     clear();
 
     int height, width;
     getmaxyx(stdscr, height, width);
 
-    attron(COLOR_PAIR(1) | A_BOLD);
+    // =========================
+    // CABECERA
+    // =========================
+
+    attron(COLOR_PAIR(3) | A_BOLD);
     mvprintw(1, 2, "ABIERTO");
-    attroff(COLOR_PAIR(1) | A_BOLD);
+    attroff(COLOR_PAIR(3) | A_BOLD);
 
-    attron(COLOR_PAIR(2));
-    mvprintw(1, width - title.length() - 2, "%s", title.c_str());
-    attroff(COLOR_PAIR(2));
+    attron(COLOR_PAIR(4) | A_BOLD);
+    mvprintw(1, width - 4, "MX");
+    attroff(COLOR_PAIR(4) | A_BOLD);
 
-    mvhline(2, 1, ACS_HLINE, width - 2);
+    // Línea superior
+    attron(COLOR_PAIR(1));
+    mvhline(2, 1, '-', width - 2);
+    attroff(COLOR_PAIR(1));
+
+    // =========================
+    // MENU
+    // =========================
 
     int menu_y = 4;
 
     for (int i = 0; i < static_cast<int>(menu.size()); i++) {
-        if (i == selected) {
-            attron(COLOR_PAIR(3) | A_BOLD);
-        }
-
-        mvprintw(menu_y + i, 4, "%s  %s",
-                 menu[i].icon.c_str(),
-                 menu[i].name.c_str());
 
         if (i == selected) {
-            attroff(COLOR_PAIR(3) | A_BOLD);
+            // Flecha cyan
+            attron(COLOR_PAIR(2) | A_BOLD);
+            mvprintw(menu_y + i, 3, ">");
+            attroff(COLOR_PAIR(2) | A_BOLD);
+
+            // Texto seleccionado blanco y negrita
+            attron(COLOR_PAIR(1) | A_BOLD);
+            mvprintw(menu_y + i, 6, "%s", menu[i].name.c_str());
+            attroff(COLOR_PAIR(1) | A_BOLD);
+
+        } else {
+            // Texto normal
+            attron(COLOR_PAIR(1));
+            mvprintw(menu_y + i, 6, "%s", menu[i].name.c_str());
+            attroff(COLOR_PAIR(1));
         }
     }
 
-    if (height >= 12) {
-        mvhline(height - 3, 1, ACS_HLINE, width - 2);
+    // =========================
+    // PIE
+    // =========================
 
-        attron(COLOR_PAIR(2));
-        mvprintw(height - 2, 2,
-                 "↑↓ Mover    Enter Seleccionar    Esc Salir");
-        attroff(COLOR_PAIR(2));
+    if (height >= 12) {
+        attron(COLOR_PAIR(1));
+        mvhline(height - 3, 1, '-', width - 2);
+
+        mvprintw(
+            height - 2,
+            2,
+            "UP/DOWN  Mover    ENTER  Seleccionar    ESC  Volver"
+        );
+
+        attroff(COLOR_PAIR(1));
     }
 
     refresh();

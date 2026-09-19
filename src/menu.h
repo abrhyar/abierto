@@ -4,7 +4,6 @@
 #include <vector>
 
 struct MenuItem {
-    std::string icon;
     std::string name;
 };
 
