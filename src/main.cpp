@@ -172,8 +172,33 @@ int main() {
                 if (!inGames) {
 
                     if (mainMenu[selected].name == "Apagar") {
-                        system("sudo poweroff");
-                    }
+                    clear();
+
+                    int height, width;
+                    getmaxyx(stdscr, height, width);
+
+                    mvprintw(
+                        height / 2 - 1,
+                        (width - 25) / 2,
+                        "¿Seguro que quieres apagar?"
+                    );
+
+                    mvprintw(
+                        height / 2 + 1,
+                        (width - 39) / 2,
+                        "[ Enter ] Confirmar    [ Esc ] Cancelar"
+                    );
+
+                    refresh();
+
+                    int confirmKey = getch();
+
+                if (confirmKey == '\n' || confirmKey == KEY_ENTER) {
+                system("sudo poweroff");
+                }
+
+    selected = 0;
+}
 
                     else if (mainMenu[selected].name == "Juegos") {
                         inGames = true;
