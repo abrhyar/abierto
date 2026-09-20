@@ -1,3 +1,4 @@
+#include "videos.h"
 #include "menu.h"
 #include "ui.h"
 #include "photos.h"
@@ -5,6 +6,7 @@
 #include <ncurses.h>
 #include <vector>
 #include <string>
+#include <cstdlib>
 
 int main() {
     initUI();
@@ -15,33 +17,116 @@ int main() {
     bool running = true;
     bool inGames = false;
     bool inPhotos = false;
+    bool inVideos = false;
 
     int selected = 0;
 
     while (running) {
 
         // =========================
-        // MENU DE FOTOS
+        // MENU DE VIDEOS
         // =========================
+        if (inVideos) {
+            std::vector<MenuItem> videosMenu = getVideos();
 
-        if (inPhotos) {
-
-            std::vector<MenuItem> photosMenu = getPhotos();
-
-            if (photosMenu.empty()) {
-
+            if (videosMenu.empty()) {
                 clear();
 
                 int height, width;
                 getmaxyx(stdscr, height, width);
 
-                attron(A_BOLD);
-                mvprintw(1, 2, "FOTOS");
-                attroff(A_BOLD);
+                mvprintw(
+                    1,
+                    2,
+                    "VIDEOS"
+                );
 
                 mvprintw(
                     height / 2,
-                    (width - 22) / 2,
+                    (width - 18) / 2,
+                    "No hay videos."
+                );
+
+                mvprintw(
+                    height - 2,
+                    2,
+                    "ESC  Volver"
+                );
+
+                refresh();
+
+                int key = getch();
+
+                if (key == 27) {
+                    inVideos = false;
+                    selected = 0;
+                }
+
+                continue;
+            }
+
+            if (selected >= static_cast<int>(videosMenu.size())) {
+                selected = videosMenu.size() - 1;
+            }
+
+            drawMenu(videosMenu, selected, "Videos");
+
+            int key = getch();
+
+            switch (key) {
+                case KEY_UP:
+                    selected--;
+
+                    if (selected < 0) {
+                        selected = videosMenu.size() - 1;
+                    }
+
+                    break;
+
+                case KEY_DOWN:
+                    selected++;
+
+                    if (selected >= static_cast<int>(videosMenu.size())) {
+                        selected = 0;
+                    }
+
+                    break;
+
+                case '\n':
+                case KEY_ENTER:
+                    openVideo(videosMenu[selected].name);
+                    break;
+
+                case 27:
+                    inVideos = false;
+                    selected = 0;
+                    break;
+            }
+
+            continue;
+        }
+
+        // =========================
+        // MENU DE FOTOS
+        // =========================
+        if (inPhotos) {
+            std::vector<MenuItem> photosMenu = getPhotos();
+
+            if (photosMenu.empty()) {
+                clear();
+
+                int height, width;
+                getmaxyx(stdscr, height, width);
+
+                mvprintw(
+                    1,
+                    2,
+                    "FOTOS"
+                );
+
+                mvprintw(
+                    height / 2,
+                    (width - 18) / 2,
                     "No hay imagenes."
                 );
 
@@ -67,16 +152,11 @@ int main() {
                 selected = photosMenu.size() - 1;
             }
 
-            drawMenu(
-                photosMenu,
-                selected,
-                "Fotos"
-            );
+            drawMenu(photosMenu, selected, "Fotos");
 
             int key = getch();
 
             switch (key) {
-
                 case KEY_UP:
                     selected--;
 
@@ -110,28 +190,13 @@ int main() {
         }
 
         // =========================
-        // MENU DE JUEGOS
+        // MENU PRINCIPAL / JUEGOS
         // =========================
 
         if (inGames) {
-
-            drawMenu(
-                gamesMenu,
-                selected,
-                "Juegos"
-            );
-
+            drawMenu(gamesMenu, selected, "Juegos");
         } else {
-
-            // =========================
-            // MENU PRINCIPAL
-            // =========================
-
-            drawMenu(
-                mainMenu,
-                selected,
-                "Launcher principal"
-            );
+            drawMenu(mainMenu, selected, "Launcher principal");
         }
 
         int key = getch();
@@ -139,7 +204,6 @@ int main() {
         switch (key) {
 
             case KEY_UP:
-
                 selected--;
 
                 if (selected < 0) {
@@ -151,7 +215,6 @@ int main() {
                 break;
 
             case KEY_DOWN:
-
                 selected++;
 
                 if (inGames &&
@@ -171,45 +234,56 @@ int main() {
 
                 if (!inGames) {
 
+                    // APAGAR
                     if (mainMenu[selected].name == "Apagar") {
-                    clear();
+                        clear();
 
-                    int height, width;
-                    getmaxyx(stdscr, height, width);
+                        int height, width;
+                        getmaxyx(stdscr, height, width);
 
-                    mvprintw(
-                        height / 2 - 1,
-                        (width - 25) / 2,
-                        "¿Seguro que quieres apagar?"
-                    );
+                        mvprintw(
+                            height / 2 - 1,
+                            (width - 25) / 2,
+                            "¿Seguro que quieres apagar?"
+                        );
 
-                    mvprintw(
-                        height / 2 + 1,
-                        (width - 39) / 2,
-                        "[ Enter ] Confirmar    [ Esc ] Cancelar"
-                    );
+                        mvprintw(
+                            height / 2 + 1,
+                            (width - 39) / 2,
+                            "[ Enter ] Confirmar    [ Esc ] Cancelar"
+                        );
 
-                    refresh();
+                        refresh();
 
-                    int confirmKey = getch();
+                        int confirmKey = getch();
 
-                if (confirmKey == '\n' || confirmKey == KEY_ENTER) {
-                system("sudo poweroff");
-                }
+                        if (confirmKey == '\n' ||
+                            confirmKey == KEY_ENTER) {
+                            system("sudo poweroff");
+                        }
 
-    selected = 0;
-}
+                        selected = 0;
+                    }
 
+                    // JUEGOS
                     else if (mainMenu[selected].name == "Juegos") {
                         inGames = true;
                         selected = 0;
                     }
 
+                    // FOTOS
                     else if (mainMenu[selected].name == "Fotos") {
                         inPhotos = true;
                         selected = 0;
                     }
 
+                    // VIDEOS
+                    else if (mainMenu[selected].name == "Vídeos") {
+                        inVideos = true;
+                        selected = 0;
+                    }
+
+                    // RESTO
                     else {
                         clear();
 
@@ -239,13 +313,13 @@ int main() {
 
                 } else {
 
+                    // VOLVER DE JUEGOS
                     if (gamesMenu[selected].name == "Volver") {
-
                         inGames = false;
                         selected = 0;
+                    }
 
-                    } else {
-
+                    else {
                         clear();
 
                         int height, width;
